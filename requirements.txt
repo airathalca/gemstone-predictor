@@ -7,5 +7,7 @@ mlflow
 dvc
 ipykernel
 xgboost
+plotly
+nbformat
 
 -e .

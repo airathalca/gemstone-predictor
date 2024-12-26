@@ -1,4 +1,4 @@
-,carat,cut,color,clarity,depth,table,x,y,z,price
+id,carat,cut,color,clarity,depth,table,x,y,z,price
 1,0.3,Ideal,E,SI1,62.1,58,4.27,4.29,2.66,499
 2,0.33,Premium,G,IF,60.8,58,4.42,4.46,2.7,984
 3,0.9,Very Good,E,VVS2,62.2,60,6.04,6.12,3.78,6289
