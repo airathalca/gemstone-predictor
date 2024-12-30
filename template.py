@@ -9,7 +9,7 @@ list_of_files = [
   f"src/{package}/logger.py",
   f"src/{package}/utils.py",
   f"src/{package}/exception.py",
-  f"src/{package}/config.py",
+  f"src/{package}/enum.py",
   f"src/{package}/components/__init__.py",
   f"src/{package}/components/data_ingestion.py",
   f"src/{package}/components/data_transformation.py",
