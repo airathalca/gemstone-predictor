@@ -10,5 +10,6 @@ xgboost
 plotly
 nbformat
 optuna
+dagshub
 
 -e .

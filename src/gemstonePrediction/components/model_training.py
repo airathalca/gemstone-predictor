@@ -23,14 +23,12 @@ class ModelTrainer:
   def __init__(self):
     self.config = ModelTrainerConfig()
 
-  def train_model(self, train_arr: np.ndarray, test_arr: np.ndarray):
+  def train_model(self, train_arr: np.ndarray):
     try:
       logging.info('Training model with XGBoost and Optuna as hyperparameter tuner started')
       study = optuna.create_study(direction='minimize')
       train_set = pd.DataFrame(train_arr)
-      test_set = pd.DataFrame(test_arr)
       X_train, y_train = train_set.iloc[:, :-1], train_set.iloc[:, -1]
-      X_test, y_test = test_set.iloc[:, :-1], test_set.iloc[:, -1]
 
       study.optimize(lambda trial: self.objective_xgb(trial, X_train, y_train), n_trials=20, show_progress_bar=True)
       logging.info(f'Best trial: {study.best_trial}')
@@ -43,10 +41,6 @@ class ModelTrainer:
       y_pred = estimator.predict(X_train)
       train_rmse = np.sqrt(mean_squared_error(y_train, y_pred))
       logging.info(f'Training RMSE: {train_rmse}')
-
-      y_pred = estimator.predict(X_test)
-      test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-      logging.info(f'Test RMSE: {test_rmse}')
 
       logging.info('Saving trained model')
       save_object(self.config.trained_model_file_path, estimator)
@@ -105,6 +99,6 @@ class ModelTrainer:
   
 if __name__ == '__main__':
   data_transformation = DataTransformation()
-  train, test, file_path = data_transformation.transform_data('artifacts/train.csv', 'artifacts/test.csv')
+  train, test = data_transformation.transform_data('artifacts/train.csv', 'artifacts/test.csv')
   model_trainer = ModelTrainer()
-  print(model_trainer.train_model(train, test))
+  print(model_trainer.train_model(train))
