@@ -10,16 +10,15 @@ from src.gemstonePrediction.enum import EnumCut, EnumColor, EnumClarity
 
 class PredictionPipeline:
   def __init__(self):
-    pass
+    logging.info('Loading model and preprocessor from artifacts folder')
+    self.preprocessor = load_object(os.path.join('artifacts', 'preprocessor.pkl'))
+    self.model = load_object(os.path.join('artifacts', 'model.pkl'))
+    logging.info('Preprocessor and model loaded successfully')
 
-  def predict(self, features, model_path):
+  def predict(self, features):
     try:
-      logging.info(f'Loading model and preprocessor from artifacts folder')
-      model = load_object(os.path.join('artifacts', model_path))
-      preprocessor = load_object(os.path.join('artifacts', 'preprocessor.pkl'))
-      logging.info(f'Preprocessing input features')
-      features_scaled = preprocessor.transform(features)
-      preds = model.predict(features_scaled)
+      features_scaled = self.preprocessor.transform(features)
+      preds = self.model.predict(features_scaled)
       return preds
     except Exception as e:
       raise CustomException(e, sys)
@@ -40,9 +39,9 @@ class CustomData:
   def get_data_as_df(self):
     try:
       custom_data = {
-        'cut': [self.cut.value],
-        'color': [self.color.value],
-        'clarity': [self.clarity.value],
+        'cut': [self.cut],
+        'color': [self.color],
+        'clarity': [self.clarity],
         'carat': [self.carat],
         'depth': [self.depth],
         'table': [self.table],

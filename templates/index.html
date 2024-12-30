@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diamond Prediction Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom Styles */
+      .btn-primary {
+        background-color: #2563eb;
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #1e40af;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 font-sans">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white py-4">
+      <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
+        <a href="#" class="text-2xl font-semibold">DiamondPredictor</a>
+        <div>
+          <a href="{{ url_for('form') }}" class="btn-primary py-2 px-6 rounded-md text-lg">Try Prediction</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="h-screen flex items-center justify-center text-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-4">
+      <div>
+        <h1 class="text-5xl font-semibold mb-6">Welcome to Diamond Prediction Tool</h1>
+        <p class="text-lg mb-8">Get accurate predictions about your diamond's value based on its characteristics.</p>
+        <a href="{{ url_for('form') }}" class="btn-primary py-3 px-8 rounded-lg text-xl">Start Predicting</a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
+      <div class="max-w-6xl mx-auto text-center px-4">
+        <h2 class="text-3xl font-semibold mb-8">Why Choose Our Tool?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div class="feature-card p-8 border border-gray-300 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4">Accurate Predictions</h3>
+            <p class="text-lg">Our algorithm uses machine learning to deliver highly accurate predictions for your diamonds.</p>
+          </div>
+          <div class="feature-card p-8 border border-gray-300 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4">Easy to Use</h3>
+            <p class="text-lg">Simply input a few characteristics and get immediate results in a user-friendly interface.</p>
+          </div>
+          <div class="feature-card p-8 border border-gray-300 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4">Fast Processing</h3>
+            <p class="text-lg">Our platform quickly processes your data and provides the results you need within seconds.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6">
+      <p>&copy; 2024 DiamondPredictor. All rights reserved.</p>
+    </footer>
+
+  </body>
+</html>
