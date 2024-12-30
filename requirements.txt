@@ -3,6 +3,7 @@ scikit-learn
 numpy
 seaborn
 flask
+flask_cors
 mlflow
 dvc
 ipykernel

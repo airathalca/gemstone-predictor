@@ -1,20 +1,25 @@
 from src.gemstonePrediction.pipeline.prediction_pipeline import CustomData, PredictionPipeline
 from flask import Flask, request, render_template, jsonify
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app)
 
 prediction_pipeline = PredictionPipeline()
 
 @app.route('/')
+@cross_origin()
 def home():
     return render_template("index.html")
 
 # Route for form page
 @app.route('/form')
+@cross_origin()
 def form():
     return render_template("form.html")
 
 @app.route("/predict", methods=["POST"])
+@cross_origin()
 def predict_datapoint():
   try:
     # Get the form data
