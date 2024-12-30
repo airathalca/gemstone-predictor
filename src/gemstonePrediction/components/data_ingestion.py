@@ -1,7 +1,6 @@
 import os
 import sys
 import pandas as pd
-import numpy as np
 
 from src.gemstonePrediction.exception import CustomException
 from src.gemstonePrediction.logger import logging
@@ -35,6 +34,11 @@ class DataIngestion:
       train_set.to_csv(self.config.train_data_path, index=False)
       test_set.to_csv(self.config.test_data_path, index=False)
       logging.info('Train and Test data saved successfully')
+
+      return [
+        self.config.train_data_path,
+        self.config.test_data_path
+      ]
 
     except Exception as e:
       logging.info("data ingestion failed")
