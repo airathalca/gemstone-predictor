@@ -1,0 +1,16 @@
+stages:
+  training:
+    cmd: python src/gemstonePrediction/pipeline/training_pipeline.py
+    deps:
+      - src/gemstonePrediction/pipeline/training_pipeline.py
+      - src/gemstonePrediction/components/data_ingestion.py
+      - src/gemstonePrediction/components/data_transformation.py
+      - src/gemstonePrediction/components/model_training.py
+      - src/gemstonePrediction/components/model_evaluation.py
+
+    outs:
+      - artifacts/raw_data.csv
+      - artifacts/test.csv
+      - artifacts/train.csv
+      - artifacts/preprocessor.pkl
+      - artifacts/model.pkl
