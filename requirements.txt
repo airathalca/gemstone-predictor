@@ -9,5 +9,6 @@ ipykernel
 xgboost
 plotly
 nbformat
+optuna
 
 -e .
