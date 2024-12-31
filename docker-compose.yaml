@@ -1,4 +1,3 @@
-version: "3"
 services:
   airflow:
     build:
@@ -7,7 +6,10 @@ services:
     image: airflowimage
     container_name: gemstone-prediction-airflow
     ports:
-      - "8080:8080"
+      - "8080:8080" #Airflow webserver
+      - "5050:5050" #MLflow tracking server
+    env_file:
+      - .env
     
   flaskapp:
     build:
@@ -16,4 +18,6 @@ services:
     image: flaskimage
     container_name: gemstone-prediction-app
     ports:
-      - "80:80"
+      - "3000:3000"
+    env_file:
+      - .env

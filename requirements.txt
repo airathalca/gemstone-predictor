@@ -1,7 +1,7 @@
 pandas
 scikit-learn
 numpy
-seaborn
+# seaborn
 flask
 flask_cors
 mlflow
@@ -9,8 +9,8 @@ dvc
 dvc-s3
 ipykernel
 xgboost
-plotly
-nbformat
+# plotly
+# nbformat
 optuna
 dagshub
 apache-airflow

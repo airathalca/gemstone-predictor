@@ -1,15 +1,27 @@
 FROM python:3.11-slim
 USER root
 RUN mkdir /app
-COPY . /app/
+COPY . /app
 WORKDIR /app/
 RUN pip3 install -r requirements.txt
+
 ENV AIRFLOW_HOME="/app/airflow"
 ENV AIRFLOW_CORE_DAGBAG_IMPORT_TIMEOUT=1000
 ENV AIRFLOW_CORE_ENABLE_XCOM_PICKLING=True
 RUN airflow db init
 RUN airflow users create -e airathalca@gmail.com -f aira -l thalca -p admin -r Admin -u admin
 RUN chmod 777 start.sh
+
 RUN apt update -y
+RUN if [ ! -e /usr/local/bin/python ]; then ln -s /usr/local/bin/python3 /usr/local/bin/python; fi
+RUN mkdir -p /app/logs && chmod -R 777 /app/logs
+
+RUN if ! dvc remote list | grep -q 'datastore'; then \
+  dvc remote add -d datastore s3://aira-dvc-gemstone; \
+  fi
+
+EXPOSE 8080
+EXPOSE 5050
+
 ENTRYPOINT [ "/bin/sh" ]
 CMD ["start.sh"]
