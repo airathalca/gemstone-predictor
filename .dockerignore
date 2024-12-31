@@ -3,3 +3,4 @@ mlruns
 template.py
 venv
 notebooks/*.ipynb
+README.md

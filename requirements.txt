@@ -6,6 +6,7 @@ flask
 flask_cors
 mlflow
 dvc
+dvc-s3
 ipykernel
 xgboost
 plotly
