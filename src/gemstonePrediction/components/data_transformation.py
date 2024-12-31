@@ -10,6 +10,7 @@ from src.gemstonePrediction.utils import save_object
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline, FunctionTransformer
 from sklearn.preprocessing import RobustScaler, StandardScaler
+from sklearn.base import BaseEstimator, TransformerMixin
 
 from dataclasses import dataclass
 
@@ -25,19 +26,21 @@ class CustomOrdinalEncoder:
     for col in X_copy.columns:
       X_copy[col] = X_copy[col].map(self.mapping[col])
     return X_copy
-  
-def generate_features(X):
-  """
-  Generate new features dynamically and return updated DataFrame.
-  """
-  X_copy = X.copy()
-  # Create new features
-  X_copy['volume'] = X_copy['x'] * X_copy['y'] * X_copy['z']
-  X_copy['density'] = X_copy['carat'] / X_copy['volume']
-  X_copy['depth_per_density'] = X_copy['depth'] / X_copy['density']
-  X_copy['depth_per_volume'] = X_copy['depth'] / X_copy['volume']
-  X_copy['depth_per_table'] = X_copy['depth'] / X_copy['table']
-  return X_copy
+
+class FeatureGenerator(BaseEstimator, TransformerMixin):
+  def fit(self, X, y=None):
+    return self
+
+  def transform(self, X):
+    X_copy = X.copy()
+    # Create new features
+    X_copy['volume'] = X_copy['x'] * X_copy['y'] * X_copy['z']
+    X_copy['density'] = X_copy['carat'] / X_copy['volume']
+    X_copy['depth_per_density'] = X_copy['depth'] / X_copy['density']
+    X_copy['depth_per_volume'] = X_copy['depth'] / X_copy['volume']
+    X_copy['depth_per_table'] = X_copy['depth'] / X_copy['table']
+    X_copy = X_copy.drop(['x', 'y', 'z'], axis=1)
+    return X_copy
 
 @dataclass
 class DataTransformationConfig:
@@ -52,7 +55,7 @@ class DataTransformation:
       logging.info('Preprocessor creation started')
       
       categorical_cols = ['cut', 'color', 'clarity']
-      numerical_cols = ['carat', 'depth', 'table', 'x', 'y', 'z']
+      numerical_cols = ['carat', 'depth', 'table', 'volume', 'density', 'depth_per_density', 'depth_per_volume', 'depth_per_table']
       
       category_orders = {
         'cut': {'Fair': 1, 'Good': 2, 'Very Good': 3, 'Premium': 4, 'Ideal': 5},
@@ -62,10 +65,8 @@ class DataTransformation:
       }
       
       logging.info('Pipeline Initiated')
-      feature_generator = FunctionTransformer(generate_features)
 
       num_pipeline = Pipeline([
-        ('feature_generator', feature_generator),
         ('scaler', RobustScaler())
       ])
 
@@ -79,7 +80,13 @@ class DataTransformation:
         ('cat', cat_pipeline, categorical_cols)
       ])
 
-      return preprocessor
+      full_preprocessor = Pipeline([
+        ('feature_generator', FeatureGenerator()),
+        ('preprocessor', preprocessor)
+      ])
+      logging.info('Preprocessor created successfully')
+
+      return full_preprocessor
     except Exception as e:
       logging.error(f"Error creating preprocessor: {e}")
       raise e
@@ -94,7 +101,6 @@ class DataTransformation:
 
       preprocessor = self.create_preprocessor()
       target = 'price'
-      logging.info('Preprocessor created successfully')
 
       train_df = train_df.dropna(axis=0)
       test_df = test_df.dropna(axis=0)

@@ -30,10 +30,12 @@ class DataIngestion:
       data.to_csv(self.config.raw_data_path, index=False)
       logging.info('Raw data saved successfully')
 
+      logging.info('Splitting data into train and test')
       train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
       train_set.to_csv(self.config.train_data_path, index=False)
       test_set.to_csv(self.config.test_data_path, index=False)
       logging.info('Train and Test data saved successfully')
+      logging.info("Data ingestion completed")
 
       return [
         self.config.train_data_path,
@@ -41,9 +43,5 @@ class DataIngestion:
       ]
 
     except Exception as e:
-      logging.info("data ingestion failed")
+      logging.info("Data ingestion failed")
       raise CustomException(e, sys)
-    
-if __name__ == "__main__":
-  data_ingestion = DataIngestion()
-  data_ingestion.read_data('notebooks/data/train.csv', 'notebooks/data/cubic_zirconia.csv')
