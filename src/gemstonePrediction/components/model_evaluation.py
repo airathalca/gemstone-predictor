@@ -11,18 +11,25 @@ from src.gemstonePrediction.logger import logging
 
 import mlflow
 import mlflow.sklearn
-import dagshub
+
+from dataclasses import dataclass
+
+@dataclass
+class ModelEvaluationConfig:
+  trained_model_file_path = os.path.join('artifacts','model.pkl')
 
 class ModelEvaluation:
   def __init__(self):
     logging.info('Loading model and preprocessor from artifacts folder')
-    self.model = load_object(os.path.join('artifacts', 'model.pkl'))
+    self.config = ModelEvaluationConfig()
+    self.model = load_object(self.config.trained_model_file_path)
     logging.info('Preprocessor and model loaded successfully')
 
   
   def eval_metrics(self,actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
     r2 = r2_score(actual, pred)
+    logging.info(f'Evaluation metrics: RMSE: {rmse}, R2: {r2}')
     return rmse, r2
 
   def evaluate_model(self, test_array):
@@ -30,11 +37,7 @@ class ModelEvaluation:
       X_test,y_test=(test_array[:,:-1], test_array[:,-1])
       logging.info('Model evaluation started')
 
-      dagshub.init(repo_owner='airathalca', repo_name='mlops-project', mlflow=True)
-      logging.info('Model has been registered successfully')
       tracking_url_type = urlparse(mlflow.get_tracking_uri()).scheme
-      print(urlparse(mlflow.get_tracking_uri()))
-      print(mlflow.get_registry_uri())
 
       with mlflow.start_run():
         predicted_qualities = self.model.predict(X_test)
@@ -45,14 +48,10 @@ class ModelEvaluation:
         # this condition is for the dagshub
         # Model registry does not work with file store
         if tracking_url_type != "file":
-            # Register the model
-            # There are other ways to use the Model Registry, which depends on the use case,
-            # please refer to the doc for more information:
-            # https://mlflow.org/docs/latest/model-registry.html#api-workflow
           mlflow.sklearn.log_model(self.model, "model", registered_model_name="ml_model")
         # it is for the local 
         else:
-            mlflow.sklearn.log_model(self.model, "model")
+          mlflow.sklearn.log_model(self.model, "model")
     except Exception as e:
       raise e
     

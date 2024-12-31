@@ -49,6 +49,8 @@ class CustomData:
         'y': [self.y],
         'z': [self.z]
       }
+      logging.info('Custom data converted to DataFrame')
       return pd.DataFrame(custom_data)
     except Exception as e:
+      logging.error('Error in converting custom data to DataFrame')
       return CustomException(e, sys)

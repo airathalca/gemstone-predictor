@@ -45,6 +45,8 @@ class FeatureGenerator(BaseEstimator, TransformerMixin):
 @dataclass
 class DataTransformationConfig:
   preprocessor_obj_path = os.path.join('artifacts', 'preprocessor.pkl')
+  train_array_path = os.path.join('artifacts', 'train_array.npy')
+  test_array_path = os.path.join('artifacts', 'test_array.npy')
 
 class DataTransformation:
   def __init__(self):
@@ -123,12 +125,14 @@ class DataTransformation:
       train_arr = np.concatenate((feature_train_df, target_train_df.values.reshape(-1, 1)), axis=1)
       test_arr = np.concatenate((feature_test_df, target_test_df.values.reshape(-1, 1)), axis=1)
 
+      np.save(self.config.train_array_path, train_arr)
+      np.save(self.config.test_array_path, test_arr)
       save_object(self.config.preprocessor_obj_path, preprocessor)
       logging.info('Preprocessor saved successfully')
 
       return (
-        train_arr,
-        test_arr
+        self.config.train_array_path,
+        self.config.test_array_path
       )
     except Exception as e:
       logging.info("data transformation failed")
