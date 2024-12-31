@@ -12,5 +12,6 @@ plotly
 nbformat
 optuna
 dagshub
+apache-airflow
 
 -e .
