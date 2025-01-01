@@ -21,7 +21,7 @@ with DAG(
   
   data_ingestion_task = BashOperator(
     task_id="data_ingestion",
-    bash_command="cd /app && dvc repro -s data_ingestion --force >> /app/logs/data_ingestion.log 2>&1",
+    bash_command="cd /app && dvc repro -s data_ingestion >> /app/logs/data_ingestion.log 2>&1",
   )
   data_ingestion_task.doc_md = dedent(
     """
@@ -33,7 +33,7 @@ with DAG(
 
   data_transform_task = BashOperator(
     task_id="data_transformation",
-    bash_command="cd /app && dvc repro -s data_transformation --force >> /app/logs/data_transformation.log 2>&1",
+    bash_command="cd /app && dvc repro -s data_transformation >> /app/logs/data_transformation.log 2>&1",
   )
   data_transform_task.doc_md = dedent(
     """
@@ -45,7 +45,7 @@ with DAG(
 
   model_trainer_task = BashOperator(
     task_id="model_trainer",
-    bash_command="cd /app && dvc repro -s model_training --force >> /app/logs/model_training.log 2>&1",
+    bash_command="cd /app && dvc repro -s model_training >> /app/logs/model_training.log 2>&1",
   )
   model_trainer_task.doc_md = dedent(
     """

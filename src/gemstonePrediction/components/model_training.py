@@ -54,7 +54,7 @@ class ModelTrainer:
         study = optuna.create_study(direction='minimize')
         study.optimize(
             lambda trial: objective_func(trial, X_train, y_train),
-            n_trials=2,
+            n_trials=10,
             show_progress_bar=True
         )
         
@@ -128,7 +128,7 @@ class ModelTrainer:
   def objective_lasso(self, trial, X_train, y_train):
     params = {
             'alpha': trial.suggest_float('alpha', 1e-3, 1e2, log=True),
-            'max_iter': 1000,
+            'max_iter': 10000,
             'random_state': 42
         }
     return self._get_cross_val_rmse(Lasso, params, X_train, y_train)
