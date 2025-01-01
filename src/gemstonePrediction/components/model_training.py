@@ -1,6 +1,7 @@
 import os
 import sys
 from urllib.parse import urlparse
+import dagshub
 import numpy as np 
 import pandas as pd
 
@@ -11,8 +12,7 @@ from src.gemstonePrediction.utils import save_object
 
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, Lasso
 from xgboost import XGBRegressor
 import optuna
 
@@ -32,7 +32,7 @@ class ModelTrainer:
     self.models = {
       'XGBRegressor': (XGBRegressor, self.objective_xgb),
       'Ridge': (Ridge, self.objective_ridge),
-      'GradientBoostingRegressor': (GradientBoostingRegressor, self.objective_gb)
+      'Lasso': (Lasso, self.objective_lasso),
     }
 
   def train_model(self, train_arr_path):
@@ -43,16 +43,18 @@ class ModelTrainer:
       X_train, y_train = train_set.iloc[:, :-1], train_set.iloc[:, -1]
       best_models = {}
       logging.info('Training data loaded successfully')
-
-      tracking_url_type = urlparse(mlflow.get_tracking_uri()).scheme
       
+      env = os.getenv('MLFLOW_ENV', 'local')
+      if env == 'local':
+        dagshub.init(repo_owner='airathalca', repo_name='mlops-project', mlflow=True)
+
       logging.info('Training model with Optuna as hyperparameter tuner started')
       for model_name, (model_class, objective_func) in self.models.items():
         logging.info(f'Training {model_name} with Optuna optimization')
         study = optuna.create_study(direction='minimize')
         study.optimize(
             lambda trial: objective_func(trial, X_train, y_train),
-            n_trials=20,
+            n_trials=2,
             show_progress_bar=True
         )
         
@@ -67,15 +69,9 @@ class ModelTrainer:
           model.fit(X_train, y_train)
 
           if model_name == 'XGBRegressor':
-            if tracking_url_type != "file":
-              mlflow.xgboost.log_model(model, model_name, registered_model_name=model_name)
-            else:
-              mlflow.xgboost.log_model(model, model_name)
+            mlflow.xgboost.log_model(model, model_name, registered_model_name=model_name)
           else:
-            if tracking_url_type != "file":
-              mlflow.sklearn.log_model(model, model_name, registered_model_name=model_name)
-            else:
-              mlflow.sklearn.log_model(model, model_name)
+            mlflow.sklearn.log_model(model, model_name, registered_model_name=model_name)
         
           y_pred = model.predict(X_train)
           rmse = np.sqrt(mean_squared_error(y_train, y_pred))
@@ -88,8 +84,8 @@ class ModelTrainer:
             'best_params': best_params
           }
 
-          mlflow.log_metric(f'{model_name}_RMSE', rmse)
-          mlflow.log_metric(f'{model_name}_R2', r2)
+          mlflow.log_metric(f'RMSE', rmse)
+          mlflow.log_metric(f'R2', r2)
 
       best_model_name = min(best_models, key=lambda x: best_models[x]['rmse'])
       best_model = best_models[best_model_name]['model']
@@ -124,23 +120,18 @@ class ModelTrainer:
     params = {
             'alpha': trial.suggest_float('alpha', 1e-3, 1e2, log=True),
             'solver': trial.suggest_categorical('solver', ['auto', 'svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']),
-            'max_iter': 1000,
+            'max_iter': 10000,
             'random_state': 42
         }
     return self._get_cross_val_rmse(Ridge, params, X_train, y_train)
 
-  def objective_gb(self, trial, X_train, y_train):
+  def objective_lasso(self, trial, X_train, y_train):
     params = {
-            'n_estimators': trial.suggest_int('n_estimators', 50, 200, step=25),
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
-            'max_depth': trial.suggest_int('max_depth', 4, 10, step=2),
-            'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
-            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 5),
-            'subsample': trial.suggest_float('subsample', 0.5, 1.0),
-            'max_features': trial.suggest_categorical('max_features', [None, 'sqrt', 'log2']),
+            'alpha': trial.suggest_float('alpha', 1e-3, 1e2, log=True),
+            'max_iter': 1000,
             'random_state': 42
         }
-    return self._get_cross_val_rmse(GradientBoostingRegressor, params, X_train, y_train)
+    return self._get_cross_val_rmse(Lasso, params, X_train, y_train)
 
   def _get_cross_val_rmse(self, model_class, params, X_train, y_train):
     kf = KFold(n_splits=4, random_state=42, shuffle=True)

@@ -1,46 +1,78 @@
 schema: '2.0'
 stages:
-  training:
-    cmd: python src/gemstonePrediction/pipeline/training_pipeline.py
+  data_ingestion:
+    cmd: python src/gemstonePrediction/pipeline/training_pipeline.py data_ingestion
     deps:
     - path: src/gemstonePrediction/components/data_ingestion.py
       hash: md5
-      md5: f3d623a7539e5a0584326b218b197661
-      size: 1759
-    - path: src/gemstonePrediction/components/data_transformation.py
-      hash: md5
-      md5: 88b02a08435217cf5b9e954c4e04b4bc
-      size: 4457
-    - path: src/gemstonePrediction/components/model_evaluation.py
-      hash: md5
-      md5: cd811d46f81472e370a18d3b809ab8e9
-      size: 2365
-    - path: src/gemstonePrediction/components/model_training.py
-      hash: md5
-      md5: 921823bc3807495568b820dacc773e0f
-      size: 3811
+      md5: 9c50a64e0a9fd6f37dd3533d456f6375
+      size: 1704
     - path: src/gemstonePrediction/pipeline/training_pipeline.py
       hash: md5
-      md5: b567d35644fbf245902cdf61ff6f31b9
-      size: 888
+      md5: 2315ca8e820424e01aff784e711ad451
+      size: 2511
     outs:
-    - path: artifacts/model.pkl
-      hash: md5
-      md5: bab1c568ea73fd4b9e64d7f7adef9484
-      size: 924683
-    - path: artifacts/preprocessor.pkl
-      hash: md5
-      md5: 780bce85fe5c76c8a03b0027027de206
-      size: 2910
     - path: artifacts/raw_data.csv
       hash: md5
-      md5: da22774b149ffffcf94e67e3761ab0bb
+      md5: e0eeedc1893bbd2c5c2b727533443f13
       size: 10722391
     - path: artifacts/test.csv
       hash: md5
-      md5: 63deb3b4ad5b5496aa742eb22024d6b8
-      size: 2144085
+      md5: 3e208ee6e6345dc7904215c14a1bfaaf
+      size: 2145310
     - path: artifacts/train.csv
       hash: md5
-      md5: 127a446873adc028f46996785b1fced1
-      size: 8578355
+      md5: 26d5e67f6c132bebc378cbc6b466dfbd
+      size: 8577130
+  data_transformation:
+    cmd: python src/gemstonePrediction/pipeline/training_pipeline.py data_transformation
+    deps:
+    - path: artifacts/test.csv
+      hash: md5
+      md5: 3e208ee6e6345dc7904215c14a1bfaaf
+      size: 2145310
+    - path: artifacts/train.csv
+      hash: md5
+      md5: 26d5e67f6c132bebc378cbc6b466dfbd
+      size: 8577130
+    - path: src/gemstonePrediction/components/data_transformation.py
+      hash: md5
+      md5: 6a1a39e73aaf0263f832bb7f265deae2
+      size: 4971
+    - path: src/gemstonePrediction/pipeline/training_pipeline.py
+      hash: md5
+      md5: 2315ca8e820424e01aff784e711ad451
+      size: 2511
+    outs:
+    - path: artifacts/preprocessor.pkl
+      hash: md5
+      md5: 3080f7c0eff5fe4a71305ff2357cc395
+      size: 2611
+    - path: artifacts/test_array.npy
+      hash: md5
+      md5: 95297a6c91643591d8073869052d0f07
+      size: 4221824
+    - path: artifacts/train_array.npy
+      hash: md5
+      md5: 2cf32a081673212dee99e9d86df903e6
+      size: 16881536
+  model_training:
+    cmd: python src/gemstonePrediction/pipeline/training_pipeline.py model_training
+    deps:
+    - path: artifacts/preprocessor.pkl
+      hash: md5
+      md5: 3080f7c0eff5fe4a71305ff2357cc395
+      size: 2611
+    - path: src/gemstonePrediction/components/model_training.py
+      hash: md5
+      md5: deba2882614228e9812cf402ff873ac4
+      size: 6201
+    - path: src/gemstonePrediction/pipeline/training_pipeline.py
+      hash: md5
+      md5: 2315ca8e820424e01aff784e711ad451
+      size: 2511
+    outs:
+    - path: artifacts/model.pkl
+      hash: md5
+      md5: 54ece0938ed410c2bb3d7267f924b504
+      size: 4029790
