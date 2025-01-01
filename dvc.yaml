@@ -20,6 +20,8 @@ stages:
 
     outs:
       - artifacts/preprocessor.pkl
+      - artifacts/train_array.npy
+      - artifacts/test_array.npy
 
   model_training:
     cmd: python src/gemstonePrediction/pipeline/training_pipeline.py model_training
