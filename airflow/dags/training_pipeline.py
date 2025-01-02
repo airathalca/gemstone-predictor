@@ -12,7 +12,7 @@ with DAG(
   "gemstone_training_pipeline",
   default_args={"retries": 2},
   description="Training pipeline for gemstone prediction",
-  schedule=timedelta(minutes=120),
+  schedule=timedelta(days=3),
   start_date=pendulum.datetime(2024, 12, 31, tz=ZoneInfo("Asia/Jakarta")),
   catchup=False,
   tags=["machine_learning ","regression", "gemstone"],

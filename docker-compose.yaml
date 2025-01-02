@@ -8,8 +8,6 @@ services:
     ports:
       - "8080:8080" #Airflow webserver
       - "5050:5050" #MLflow tracking server
-    env_file:
-      - .env
     
   flaskapp:
     build:
@@ -19,5 +17,3 @@ services:
     container_name: gemstone-prediction-app
     ports:
       - "3000:3000"
-    env_file:
-      - .env
