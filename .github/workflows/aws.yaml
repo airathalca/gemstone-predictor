@@ -1,0 +1,118 @@
+name: Build and Deploy Docker Images to AWS
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Run tests
+      run: |
+        # Run integration tests here.
+        echo "Running integration tests"
+
+  build-and-push:
+    name: Build and Push Docker Images
+    needs: integration
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Login to AWS ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Build and push Docker Airflow image to Amazon ECR
+      - name: Build, tag, and push Docker Airflow image to Amazon ECR
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_AIRFLOW }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -f Dockerfile.airflow -t $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "image-airflow=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Build, tag, and push Docker Flask image to Amazon ECR
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_FLASK }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "image-flask=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+  
+  deploy:
+    name: Deploy to Amazon ECS
+    needs: build-and-push
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull airflow and flask images from Amazon ECR
+        id: pull-image-airflow
+        run: |
+          docker pull ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_AIRFLOW }}:latest
+          docker pull ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_FLASK }}:latest
+
+      - name: Run both containers on Amazon ECS
+        run: |
+          # stop and remove the existing containers
+          docker stop gemstone-prediction-airflow || true
+          docker rm gemstone-prediction-airflow || true
+          docker stop gemstone-prediction-app || true
+          docker rm gemstone-prediction-app || true
+
+          # run the new containers
+          docker run -d --name gemstone-prediction-airflow -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY -p 8080:8080 -p 5050:5050 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_AIRFLOW }}:latest
+          docker run -d --name gemstone-prediction-app -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY -p 3000:3000 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_FLASK }}:latest
+
+
+
+
+
+
+
+
+
