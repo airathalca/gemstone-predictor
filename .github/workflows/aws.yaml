@@ -49,7 +49,7 @@ jobs:
 
       # Build and push Docker Airflow image to Amazon ECR
       - name: Build, tag, and push Docker Airflow image to Amazon ECR
-        id: build-image
+        id: build-image-airflow
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_AIRFLOW }}
@@ -60,7 +60,7 @@ jobs:
           echo "image-airflow=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Build, tag, and push Docker Flask image to Amazon ECR
-        id: build-image
+        id: build-image-flask
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_FLASK }}
