@@ -55,7 +55,7 @@ jobs:
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_AIRFLOW }}
           IMAGE_TAG: latest
         run: |
-          docker build -f Dockerfile.airflow -t $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -f Dockerfile.airflow -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image-airflow=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
@@ -66,7 +66,7 @@ jobs:
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_FLASK }}
           IMAGE_TAG: latest
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build -f Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image-flask=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
   
@@ -105,8 +105,8 @@ jobs:
           docker rm gemstone-prediction-app || true
 
           # run the new containers
-          docker run -d --name gemstone-prediction-airflow -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" -p 8080:8080 -p 5050:5050 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_AIRFLOW }}:latest
-          docker run -d --name gemstone-prediction-app -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" -p 3000:3000 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_FLASK }}:latest
+          docker run -d --name gemstone-prediction-airflow -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_REGION="${{ secrets.AWS_REGION }}" -p 8080:8080 -p 5050:5050 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_AIRFLOW }}:latest
+          docker run -d --name gemstone-prediction-app -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_REGION="${{ secrets.AWS_REGION }}" -p 3000:3000 ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_FLASK }}:latest
 
 
 
